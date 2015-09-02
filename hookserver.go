@@ -24,6 +24,7 @@ func init() {
 	if err != nil {
 		panic("Can't open config file.")
 	}
+
 	configContent, err := ioutil.ReadAll(file)
 	if err != nil {
 		panic("Can't read config file.")
