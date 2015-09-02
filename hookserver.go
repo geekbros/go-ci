@@ -41,8 +41,11 @@ func init() {
 
 func main() {
 	cmd := exec.Command(webhookBinPath, "-hooks", hooksPath, "-verbose", portParameter)
-	stdout, _ := cmd.StdoutPipe()
-	err := cmd.Start()
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		panic(err)
+	}
+	err = cmd.Start()
 	if err != nil {
 		panic(err)
 	}
