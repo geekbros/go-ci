@@ -1,7 +1,6 @@
 [
   {
     "id": "redeploy",
-    "execute-command": "./redeploy.sh",
-    "command-working-directory": "./"
+    "execute-command": "./redeploy.sh"
   }
 ]

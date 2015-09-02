@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -41,14 +40,11 @@ func init() {
 
 func main() {
 	cmd := exec.Command(webhookBinPath, "-hooks", hooksPath, "-verbose", portParameter)
-	stdout, err := cmd.StdoutPipe()
+	//cmd := exec.Command("echo", "hello")
+	cmd.Stderr = os.Stdout
+	err := cmd.Start()
 	if err != nil {
 		panic(err)
 	}
-	err = cmd.Start()
-	if err != nil {
-		panic(err)
-	}
-	io.Copy(os.Stdout, stdout)
 	cmd.Wait()
 }
