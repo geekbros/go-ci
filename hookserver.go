@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
-	"os/exec"
 )
 
 const (
@@ -38,13 +38,22 @@ func init() {
 	webhookBinPath = config["hook_bin"].(string)
 }
 
-func main() {
-	cmd := exec.Command(webhookBinPath, "-hooks", hooksPath, "-verbose", portParameter)
-	//cmd := exec.Command("echo", "hello")
-	cmd.Stderr = os.Stdout
-	err := cmd.Start()
-	if err != nil {
-		panic(err)
-	}
-	cmd.Wait()
+func redeploy(w http.ResponseWriter, r *http.Request) {
+
 }
+
+func main() {
+	http.HandleFunc(`/hooks/redeploy`, redeploy)
+	http.ListenAndServe(":9000", nil)
+}
+
+// func main() {
+// 	cmd := exec.Command(webhookBinPath, "-hooks", hooksPath, "-verbose", portParameter)
+// 	//cmd := exec.Command("echo", "hello")
+// 	cmd.Stderr = os.Stdout
+// 	err := cmd.Start()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	cmd.Wait()
+// }
