@@ -97,6 +97,7 @@ func notify(r *githubResponse) {
 	)
 
 	data := fmt.Sprintf(`payload={"channel": "#godev", "text": "%v"}`, filledMessage)
+	fmt.Println("Data: ", data)
 	req, _ := http.NewRequest("POST", notificationURL, bytes.NewBufferString(data))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
