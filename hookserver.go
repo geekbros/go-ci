@@ -13,7 +13,7 @@ import (
 
 const (
 	configJSONPath = "./config.json"
-	message        = `*%v*: *%v* pushed to *%v*, *message*: \"%v\".\n *Repo URL*: %v.\n *Commit URL*: %v.\n *Build status*: %v.`
+	message        = `*%v* pushed to *%v*\n *Message*: \"%v\".\n *Repo URL*: %v.\n *Commit URL*: %v.\n *Build status*: %v.`
 )
 
 var (
@@ -82,13 +82,12 @@ func notify(r *githubResponse) {
 	fmt.Println("In notify")
 	filledMessage := fmt.Sprintf(
 		message,
-		r.HeadCommit.Timestamp,
 		r.HeadCommit.Committer.Name,
 		r.Repository.Name,
 		r.HeadCommit.Message,
 		r.Repository.URL,
 		r.HeadCommit.URL,
-		"OK",
+		":suspect:",
 	)
 
 	data := fmt.Sprintf(`payload={"channel": "#godev", "text": "%v"}`, filledMessage)
