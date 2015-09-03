@@ -96,7 +96,6 @@ func notify(r *githubResponse) {
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
 	_, err := http.DefaultClient.Do(req)
-
 	if err != nil {
 		log.Println(err)
 	}
