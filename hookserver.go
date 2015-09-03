@@ -83,6 +83,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 }
 
 func notify(r *githubResponse) {
+	fmt.Println("In notify")
 	filledMessage := fmt.Sprintf(
 		message,
 		r.HeadCommit.Timestamp,
