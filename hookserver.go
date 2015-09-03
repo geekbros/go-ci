@@ -36,7 +36,10 @@ func init() {
 	}
 
 	config := make(map[string]interface{})
-	json.Unmarshal(configContent, &config)
+	err = json.Unmarshal(configContent, &config)
+	if err != nil {
+		panic("Can't parse config file as json: " + err.Error())
+	}
 
 	fmt.Printf("%+v\n", config)
 
