@@ -2,7 +2,7 @@
     "port":9000,
     "hooks_path":"./hooks.json",
     "notification_url":"https://hooks.slack.com/services/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",
-    "channel":"#godev",
+    "channel":"#gobuild",
     "gopath_local_repos":[
         {
             "path":"src/github.com/geekbros/SHM-Backend/",
