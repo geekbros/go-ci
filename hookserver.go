@@ -61,7 +61,6 @@ func init() {
 	if err != nil {
 		panic("Can't read config file.")
 	}
-
 	err = json.Unmarshal(configContent, &cfg)
 	if err != nil {
 		panic("Can't parse config file as json: " + err.Error())
