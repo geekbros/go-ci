@@ -110,7 +110,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 func notify(r *githubResponse) {
 	filledMessage, _ := json.Marshal(getSlackMessageGood(r))
-	data := fmt.Sprintf(`payload={"channel": "#godev", "text": "%v"}`, filledMessage)
+	data := fmt.Sprintf(`payload={"channel": "#godev", "text": "%v"}`, string(filledMessage))
 	req, _ := http.NewRequest("POST", cfg.NotificationURL, bytes.NewBufferString(data))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
