@@ -20,14 +20,20 @@ const (
 )
 
 var (
-	webhookBinPath  string
-	port            string
-	hooksPath       string
-	notificationURL string
-	repos           []string
+	cfg config
 )
 
 type (
+	config struct {
+		Port            string `json:"port"`
+		HooksPath       string `json:"hooks_path"`
+		NotificationURL string `json:"notification_url"`
+		Repos           []struct {
+			Path    string   `json:"path"`
+			Scripts []string `json:"scripts"`
+		} `json:"gopath_local_repos"`
+	}
+
 	githubResponse struct {
 		HeadCommit struct {
 			Timestamp string `json:"timestamp"`
@@ -56,19 +62,11 @@ func init() {
 		panic("Can't read config file.")
 	}
 
-	config := make(map[string]interface{})
-	err = json.Unmarshal(configContent, &config)
+	err = json.Unmarshal(configContent, &cfg)
 	if err != nil {
 		panic("Can't parse config file as json: " + err.Error())
 	}
-	fmt.Printf("%+v\n", config)
-	notificationURL = config["notification_url"].(string)
-	port = fmt.Sprintf("%v", int64(config["port"].(float64)))
-	hooksPath = config["hooks_path"].(string)
-	webhookBinPath = config["hook_bin"].(string)
-	for _, v := range config["gopath_local_repos"].([]interface{}) {
-		repos = append(repos, v.(string))
-	}
+	fmt.Printf("%+v\n", cfg)
 }
 
 func redeploy(w http.ResponseWriter, r *http.Request) {
@@ -81,8 +79,6 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 }
 
 func notify(r *githubResponse) {
-
-	fmt.Println("In notify")
 	filledMessage := fmt.Sprintf(
 		message,
 		r.HeadCommit.Committer.Name,
@@ -92,10 +88,8 @@ func notify(r *githubResponse) {
 		r.HeadCommit.URL,
 		":suspect:",
 	)
-
 	data := fmt.Sprintf(`payload={"channel": "#godev", "text": "%v"}`, filledMessage)
-	fmt.Println("Data: ", data)
-	req, _ := http.NewRequest("POST", notificationURL, bytes.NewBufferString(data))
+	req, _ := http.NewRequest("POST", cfg.NotificationURL, bytes.NewBufferString(data))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
 	_, err := http.DefaultClient.Do(req)
@@ -108,18 +102,3 @@ func main() {
 	http.HandleFunc(`/hooks/redeploy`, redeploy)
 	http.ListenAndServe(":9000", nil)
 }
-
-// func notify() {
-// 	data := fmt.Sprintf(`payload={"channel": "#godev", "text": "hey guys"}`)
-// 	req, _ := http.NewRequest("POST", notificationURL, bytes.NewBufferString(data))
-// 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-// 	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
-// 	_, err := http.DefaultClient.Do(req)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// }
-//
-// func main() {
-// 	notify()
-// }

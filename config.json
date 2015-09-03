@@ -1,7 +1,6 @@
 {
     "port":9000,
     "hooks_path":"./hooks.json",
-    "hook_bin":"./webhook",
     "notification_url":"https://hooks.slack.com/services/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",
     "gopath_local_repos":[
         {
