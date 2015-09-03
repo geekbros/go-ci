@@ -40,7 +40,6 @@ func init() {
 	if err != nil {
 		panic("Can't parse config file as json: " + err.Error())
 	}
-
 	fmt.Printf("%+v\n", config)
 
 	port = fmt.Sprintf("%v", int64(config["port"].(float64)))
