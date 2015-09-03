@@ -25,7 +25,7 @@ var (
 
 type (
 	config struct {
-		Port            string `json:"port"`
+		Port            int    `json:"port"`
 		HooksPath       string `json:"hooks_path"`
 		NotificationURL string `json:"notification_url"`
 		Repos           []struct {
@@ -100,5 +100,5 @@ func notify(r *githubResponse) {
 
 func main() {
 	http.HandleFunc(`/hooks/redeploy`, redeploy)
-	http.ListenAndServe(":9000", nil)
+	http.ListenAndServe(fmt.Sprintf(":%v", cfg.Port), nil)
 }
