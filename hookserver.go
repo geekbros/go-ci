@@ -14,7 +14,7 @@ import (
 const (
 	configJSONPath = "./config.json"
 
-	message = `%v: %v pushed to %v, message:"%v". Repo URL: %v. Commit URL: %v. Build status: %v.`
+	message = `%v: %v pushed to %v, message: %v. Repo URL: %v. Commit URL: %v. Build status: %v.`
 )
 
 var (
