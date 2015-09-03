@@ -71,7 +71,6 @@ type (
 )
 
 func getSlackMessageGood(r *githubResponse) slackMessage {
-
 	return slackMessage{
 		Channel: cfg.Channel,
 		Attachments: []attachment{
