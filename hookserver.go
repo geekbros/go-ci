@@ -46,7 +46,9 @@ func init() {
 	port = fmt.Sprintf("%v", int64(config["port"].(float64)))
 	hooksPath = config["hooks_path"].(string)
 	webhookBinPath = config["hook_bin"].(string)
-	repos = config["gopath_local_repos"].([]string)
+	for _, v := range config["gopath_local_repos"].([]interface{}) {
+		repos = append(repos, v.(string))
+	}
 }
 
 func redeploy(w http.ResponseWriter, r *http.Request) {
