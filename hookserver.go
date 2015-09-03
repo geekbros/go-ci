@@ -13,6 +13,13 @@ import (
 
 const (
 	configJSONPath = "./config.json"
+
+	message = `
+	%v: %v pushed to %v, message:"%v".
+	Repo URL: %v.
+	Commit URL: %v.
+	Build status: %v
+	`
 )
 
 var (
@@ -21,6 +28,23 @@ var (
 	hooksPath       string
 	notificationURL string
 	repos           []string
+)
+
+type (
+	githubResponse struct {
+		HeadCommit struct {
+			Timestamp string `json:"timestamp"`
+			URL       string `json:"url"`
+			Message   string `json:"message"`
+			Committer struct {
+				Name string `json:"name"`
+			} `json:"committer"`
+		} `json:"head_commit"`
+		Repository struct {
+			Name string `json:"full_name"`
+			URL  string `json:"https://github.com/geekbros/go-ci"`
+		} `json:"repository"`
+	}
 )
 
 func init() {
@@ -52,16 +76,27 @@ func init() {
 
 func redeploy(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	content, err := ioutil.ReadAll(r.Body)
-	fmt.Println("Content: ", string(content), ", Error: ", err)
-	//notify(w, r)
+	content, _ := ioutil.ReadAll(r.Body)
+	resp := &githubResponse{}
+	json.Unmarshal(content, resp)
+	notify(resp)
 }
 
-func notify(w http.ResponseWriter, r *http.Request) {
-	data := `payload={"channel": "#godev", "text": "This is posted to #godev and comes from a bot named webhookbot."}`
+func notify(r *githubResponse) {
+	filledMessage := fmt.Sprintf(
+		message,
+		r.HeadCommit.Timestamp,
+		r.HeadCommit.Committer.Name,
+		r.Repository.Name,
+		r.HeadCommit.Message,
+		r.Repository.URL,
+		r.HeadCommit.URL,
+		"OK",
+	)
+	data := fmt.Sprintf(`payload={"channel": "#godev", "text": "%v"}`, filledMessage)
 	req, _ := http.NewRequest("POST", notificationURL, bytes.NewBufferString(data))
-	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	r.Header.Add("Content-Length", strconv.Itoa(len(data)))
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
 	_, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Println(err)
