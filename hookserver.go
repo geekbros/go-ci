@@ -13,7 +13,6 @@ import (
 
 const (
 	configJSONPath = "./config.json"
-	message        = `>>>*%v* pushed to *%v*\n *Message*: \"%v\".\n *Repo URL*: %v.\n *Commit URL*: %v.\n *Build status*: %v.`
 
 	buildOK   = ":white_check_mark:"
 	buildFail = ":sos:"
@@ -28,6 +27,7 @@ type (
 		Port            int    `json:"port"`
 		HooksPath       string `json:"hooks_path"`
 		NotificationURL string `json:"notification_url"`
+		Channel         string `json:"channel"`
 		Repos           []struct {
 			Path    string   `json:"path"`
 			Scripts []string `json:"scripts"`
@@ -48,7 +48,39 @@ type (
 			URL  string `json:"url"`
 		} `json:"repository"`
 	}
+
+	attachment struct {
+		Fallback  string            `json:"fallback"`
+		Color     string            `json:"color"`
+		Title     string            `json:"title"`
+		TitleLink string            `json:"title_link"`
+		Text      string            `json:"text"`
+		Fields    map[string]string `json:"fields"`
+	}
+
+	slackMessage struct {
+		Channel     string       `json:"string"`
+		Attachments []attachment `json:"attachments"`
+	}
 )
+
+func getSlackMessageGood(r *githubResponse) slackMessage {
+	return slackMessage{
+		Channel: cfg.Channel,
+		Attachments: []attachment{
+			attachment{
+				Fallback:  "Build succeeded",
+				Color:     "good",
+				Title:     "Push to " + r.Repository.Name,
+				TitleLink: r.HeadCommit.URL,
+				Fields: map[string]string{
+					"Author":  r.HeadCommit.Committer.Name,
+					"Message": r.HeadCommit.Message,
+				},
+			},
+		},
+	}
+}
 
 func init() {
 	file, err := os.Open(configJSONPath)
@@ -78,15 +110,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 }
 
 func notify(r *githubResponse) {
-	filledMessage := fmt.Sprintf(
-		message,
-		r.HeadCommit.Committer.Name,
-		r.Repository.Name,
-		r.HeadCommit.Message,
-		r.Repository.URL,
-		r.HeadCommit.URL,
-		":suspect:",
-	)
+	filledMessage, _ := json.Marshal(getSlackMessageGood(r))
 	data := fmt.Sprintf(`payload={"channel": "#godev", "text": "%v"}`, filledMessage)
 	req, _ := http.NewRequest("POST", cfg.NotificationURL, bytes.NewBufferString(data))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
