@@ -65,7 +65,6 @@ func init() {
 		panic("Can't parse config file as json: " + err.Error())
 	}
 	fmt.Printf("%+v\n", config)
-
 	notificationURL = config["notification_url"].(string)
 	port = fmt.Sprintf("%v", int64(config["port"].(float64)))
 	hooksPath = config["hooks_path"].(string)
