@@ -12,12 +12,12 @@ import (
 )
 
 const (
-	configJSONPath = "config.json"
+	configJSONPath = "./config.json"
 )
 
 var (
 	webhookBinPath  string
-	portParameter   string
+	port            string
 	hooksPath       string
 	notificationURL string
 	repos           []string
@@ -39,7 +39,7 @@ func init() {
 
 	fmt.Printf("%+v\n", config)
 
-	portParameter = fmt.Sprintf("-port=%v", int64(config["port"].(float64)))
+	port = fmt.Sprintf("%v", int64(config["port"].(float64)))
 	hooksPath = config["hooks_path"].(string)
 	webhookBinPath = config["hook_bin"].(string)
 	repos = config["gopath_local_repos"].([]string)
