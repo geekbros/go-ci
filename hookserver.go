@@ -53,7 +53,6 @@ func init() {
 	if err != nil {
 		panic("Can't read config file.")
 	}
-
 	config := make(map[string]interface{})
 	err = json.Unmarshal(configContent, &config)
 	if err != nil {
