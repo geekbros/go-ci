@@ -13,7 +13,10 @@ import (
 
 const (
 	configJSONPath = "./config.json"
-	message        = `*%v* pushed to *%v*\n *Message*: \"%v\".\n *Repo URL*: %v.\n *Commit URL*: %v.\n *Build status*: %v.`
+	message        = `>>>*%v* pushed to *%v*\n *Message*: \"%v\".\n *Repo URL*: %v.\n *Commit URL*: %v.\n *Build status*: %v.`
+
+	buildOK   = ":white_check_mark:"
+	buildFail = ":sos:"
 )
 
 var (
