@@ -30,6 +30,7 @@ func init() {
 		panic("Can't open config file.")
 	}
 	configContent, err := ioutil.ReadAll(file)
+	fmt.Println(string(configContent))
 	if err != nil {
 		panic("Can't read config file.")
 	}
