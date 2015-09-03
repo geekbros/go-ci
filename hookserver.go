@@ -14,12 +14,7 @@ import (
 const (
 	configJSONPath = "./config.json"
 
-	message = `
-	%v: %v pushed to %v, message:"%v".
-	Repo URL: %v.
-	Commit URL: %v.
-	Build status: %v
-	`
+	message = `%v: %v pushed to %v, message:"%v". Repo URL: %v. Commit URL: %v. Build status: %v.`
 )
 
 var (
@@ -42,7 +37,7 @@ type (
 		} `json:"head_commit"`
 		Repository struct {
 			Name string `json:"full_name"`
-			URL  string `json:"https://github.com/geekbros/go-ci"`
+			URL  string `json:"url"`
 		} `json:"repository"`
 	}
 )
