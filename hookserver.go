@@ -80,6 +80,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	resp := &githubResponse{}
 	json.Unmarshal(content, resp)
 	notify(resp)
+
 }
 
 func notify(r *githubResponse) {
