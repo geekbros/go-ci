@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -8,7 +9,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"path"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -19,19 +23,22 @@ const (
 )
 
 var (
-	cfg config
+	cfg    config
+	gopath = os.Getenv("GOPATH")
 )
 
 type (
+	repo struct {
+		Path    string   `json:"path"`
+		Scripts []string `json:"scripts"`
+	}
+
 	config struct {
 		Port            int    `json:"port"`
 		HooksPath       string `json:"hooks_path"`
 		NotificationURL string `json:"notification_url"`
 		Channel         string `json:"channel"`
-		Repos           []struct {
-			Path    string   `json:"path"`
-			Scripts []string `json:"scripts"`
-		} `json:"gopath_local_repos"`
+		Repos           []repo `json:"gopath_local_repos"`
 	}
 
 	githubResponse struct {
@@ -70,22 +77,22 @@ type (
 	}
 )
 
-func getSlackMessageGood(r *githubResponse) slackMessage {
+func getSlackMessageGood(success bool, log string, r *githubResponse) slackMessage {
 	return slackMessage{
 		Channel: cfg.Channel,
 		Attachments: []attachment{
 			attachment{
 				Fallback:  "Build succeeded",
 				Color:     "good",
-				Title:     "Push to " + r.Repository.Name,
+				Title:     r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name,
 				TitleLink: r.HeadCommit.URL,
 				Fields: []field{
-					field{"Author", r.HeadCommit.Committer.Name, false},
-					field{"Message", r.HeadCommit.Message, false},
+					field{"Message", r.HeadCommit.Message, true},
 				},
 			},
 		},
 	}
+
 }
 
 func init() {
@@ -106,17 +113,54 @@ func init() {
 	fmt.Printf("%+v\n", cfg)
 }
 
+func getRepo(repoName string) (r repo) {
+	for _, v := range cfg.Repos {
+		if strings.Contains(v.Path, repoName) {
+			r = v
+		}
+	}
+	return
+}
+
 func redeploy(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	content, _ := ioutil.ReadAll(r.Body)
 	resp := &githubResponse{}
 	json.Unmarshal(content, resp)
-	notify(resp)
 
+	currentDir, _ := os.Getwd()
+
+	var (
+		cmd      *exec.Cmd
+		tempText string
+		fullLog  string
+		success  = true
+	)
+
+	repo := getRepo(resp.Repository.Name)
+
+	repoDir := path.Join(gopath, repo.Path)
+	os.Chdir(repoDir)
+	for _, s := range repo.Scripts {
+		cmd = exec.Command(s)
+		stdout, _ := cmd.StdoutPipe()
+		cmd.Start()
+		buf := bufio.NewScanner(stdout)
+		for buf.Scan() {
+			tempText = buf.Text()
+			fullLog += tempText
+			if strings.Contains(tempText, "FAIL") {
+				success = false
+			}
+		}
+		cmd.Wait()
+	}
+
+	notify(resp)
 }
 
-func notify(r *githubResponse) {
-	filledMessage, _ := json.Marshal(getSlackMessageGood(r))
+func notify(s *slackMessage) {
+	filledMessage, _ := json.Marshal(s)
 	data := fmt.Sprintf(`payload=%v`, string(filledMessage))
 	req, _ := http.NewRequest("POST", cfg.NotificationURL, bytes.NewBufferString(data))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
