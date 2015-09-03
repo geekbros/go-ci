@@ -49,13 +49,19 @@ type (
 		} `json:"repository"`
 	}
 
+	field struct {
+		Title string `json:"title"`
+		Value string `json:"value"`
+		Short bool   `json:"short"`
+	}
+
 	attachment struct {
-		Fallback  string            `json:"fallback"`
-		Color     string            `json:"color"`
-		Title     string            `json:"title"`
-		TitleLink string            `json:"title_link"`
-		Text      string            `json:"text"`
-		Fields    map[string]string `json:"fields"`
+		Fallback  string  `json:"fallback"`
+		Color     string  `json:"color"`
+		Title     string  `json:"title"`
+		TitleLink string  `json:"title_link"`
+		Text      string  `json:"text"`
+		Fields    []field `json:"fields"`
 	}
 
 	slackMessage struct {
@@ -74,9 +80,9 @@ func getSlackMessageGood(r *githubResponse) slackMessage {
 				Color:     "good",
 				Title:     "Push to " + r.Repository.Name,
 				TitleLink: r.HeadCommit.URL,
-				Fields: map[string]string{
-					"Author":  r.HeadCommit.Committer.Name,
-					"Message": r.HeadCommit.Message,
+				Fields: []field{
+					field{"Author", r.HeadCommit.Committer.Name, false},
+					field{"Message", r.HeadCommit.Message, false},
 				},
 			},
 		},
