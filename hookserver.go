@@ -236,4 +236,5 @@ func notify(s *slackMessage) {
 func main() {
 	http.HandleFunc(`/hooks/redeploy`, redeploy)
 	http.ListenAndServe(fmt.Sprintf(":%v", cfg.Port), nil)
+	fmt.Printf("%+v\n", cfg)
 }
