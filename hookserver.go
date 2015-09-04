@@ -173,6 +173,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		notify(getSlackMessage(false, &fullLog, resp))
 		return
 	}
+
 	defer os.Chdir(currentDir)
 	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
