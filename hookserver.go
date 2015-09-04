@@ -182,6 +182,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 		// Can't execute script - notify about fail and stop.
 		if err != nil {
+			log.Println("Script execution error: ", err)
 			fullLog = "Can't execute script " + s
 			notify(getSlackMessage(false, &fullLog, resp))
 			return
