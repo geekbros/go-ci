@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -146,10 +145,9 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	currentDir, _ := os.Getwd()
 
 	var (
-		cmd      *exec.Cmd
-		tempText string
-		fullLog  string
-		success  = true
+		cmd     *exec.Cmd
+		fullLog string
+		success = true
 	)
 
 	// Find out which repo was changed.
@@ -189,11 +187,8 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			notify(getSlackMessage(false, &fullLog, resp))
 			return
 		}
-		buf := bufio.NewScanner(stdout)
-		for buf.Scan() {
-			tempText = buf.Text()
-			fullLog += tempText
-		}
+		content, _ := ioutil.ReadAll(stdout)
+		fullLog = string(content)
 
 		err = cmd.Wait()
 		// Script executed with error - notify about fail and stop.
