@@ -175,7 +175,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
-		cmd = exec.Command(s)
+		cmd = exec.Command("./" + s)
 		stdout, _ := cmd.StdoutPipe()
 		err = cmd.Start()
 		// Can't execute script - notify about fail and stop.
