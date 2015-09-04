@@ -80,7 +80,7 @@ type (
 	}
 )
 
-func getSlackMessage(success bool, log *string, r *githubResponse) *slackMessage {
+func getSlackMessage(success bool, log *string, title string, r *githubResponse) *slackMessage {
 	var (
 		fallback string
 		color    string
@@ -100,8 +100,8 @@ func getSlackMessage(success bool, log *string, r *githubResponse) *slackMessage
 			attachment{
 				Fallback:  fallback,
 				Color:     color,
-				Text:      text,
-				Title:     r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name,
+				Text:      "__After " + r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name + "__\n" + text,
+				Title:     title,
 				TitleLink: r.HeadCommit.URL,
 				Fields: []field{
 					field{"Message", r.HeadCommit.Message, true},
@@ -156,7 +156,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	repo := getRepo(resp.Repository.Name)
 	if repo.Path == "" {
 		fullLog = "Repo is not listed in config"
-		notify(getSlackMessage(false, &fullLog, resp))
+		notify(getSlackMessage(false, &fullLog, "Build failed", resp))
 		return
 	}
 
@@ -168,7 +168,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	defer os.Chdir(currentDir)
 	if err != nil {
 		fullLog = "Can't change current dir to repo's dir."
-		notify(getSlackMessage(false, &fullLog, resp))
+		notify(getSlackMessage(false, &fullLog, "Build failed", resp))
 		return
 	}
 
@@ -181,7 +181,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Syncing error: ", err.Error())
 		fullLog = "Can't sync repo " + resp.Repository.Name
-		notify(getSlackMessage(false, &fullLog, resp))
+		notify(getSlackMessage(false, &fullLog, "Build failed", resp))
 		return
 	}
 
@@ -202,7 +202,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println("Script execution error: ", err)
 			fullLog = "Can't execute script " + s
-			notify(getSlackMessage(false, &fullLog, resp))
+			notify(getSlackMessage(false, &fullLog, s, resp))
 			return
 		}
 		content, _ := ioutil.ReadAll(stdout)
@@ -216,11 +216,11 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			log.Println("Failed while executing " + s)
 			log.Println("Error message: ", err.Error())
 			success = false
-			notify(getSlackMessage(success, &fullLog, resp))
+			notify(getSlackMessage(success, &fullLog, s, resp))
 			return
 		}
 		// Everything is OK - notify about success and continue executing other scripts.
-		notify(getSlackMessage(success, &fullLog, resp))
+		notify(getSlackMessage(success, &fullLog, s, resp))
 	}
 }
 
