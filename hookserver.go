@@ -192,6 +192,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			tempText = buf.Text()
 			fullLog += tempText
 		}
+
 		err = cmd.Wait()
 		// Script executed with error - notify about fail and stop.
 		if err != nil {
