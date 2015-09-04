@@ -165,9 +165,10 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	// Go to repo's directory.
 	// Notify about failure if changed repo can't be found locally.
 	repoDir := path.Join(gopath, repo.Path)
+	log.Println("Repo dir: ", repoDir)
 	err := os.Chdir(repoDir)
 	if err != nil {
-		fullLog = "Can't change current dit to repo's dir."
+		fullLog = "Can't change current dir to repo's dir."
 		notify(getSlackMessage(false, &fullLog, resp))
 		return
 	}
@@ -180,7 +181,8 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 		// Can't execute script - notify about fail and stop.
 		if err != nil {
-			fail(s, err, &fullLog, resp, &success)
+			fullLog = "Can't execute script " + s
+			notify(getSlackMessage(false, &fullLog, resp))
 			return
 		}
 		buf := bufio.NewScanner(stdout)
@@ -191,20 +193,15 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		err = cmd.Wait()
 		// Script executed with error - notify about fail and stop.
 		if err != nil {
-			fail(s, err, &fullLog, resp, &success)
+			log.Println("Failed while executing " + s)
+			log.Println("Error message: ", err.Error())
+			success = false
+			notify(getSlackMessage(success, &fullLog, resp))
 			return
 		}
 		// Everything is OK - notify about success and continue executing other scripts.
 		notify(getSlackMessage(success, &fullLog, resp))
 	}
-}
-
-func fail(script string, err error, fullLog *string, resp *githubResponse, success *bool) {
-	log.Println("Failed while executing " + script)
-	log.Println("Error message: ", err.Error())
-	*success = false
-	notify(getSlackMessage(*success, fullLog, resp))
-	return
 }
 
 func notify(s *slackMessage) {
