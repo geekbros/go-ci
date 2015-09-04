@@ -172,7 +172,6 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer os.Chdir(currentDir)
-
 	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
 		cmd = exec.Command("./" + s)
