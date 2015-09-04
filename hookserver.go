@@ -177,6 +177,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		cmd = exec.Command("./" + s)
 		stdout, _ := cmd.StdoutPipe()
 		err = cmd.Start()
+
 		// Can't execute script - notify about fail and stop.
 		if err != nil {
 			fail(s, err, &fullLog, resp, &success)
