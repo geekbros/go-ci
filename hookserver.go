@@ -176,7 +176,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	defer os.Chdir(currentDir)
 	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
-		cmd = exec.Command("./" + s)
+		cmd = exec.Command("sudo", "./"+s)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stdout
 		stdout, _ := cmd.StdoutPipe()
