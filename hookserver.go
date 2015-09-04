@@ -176,6 +176,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	pull.Start()
 	err = pull.Wait()
 	if err != nil {
+		log.Println("Syncing error: ", err.Error())
 		fullLog = "Can't sync repo " + resp.Repository.Name
 		notify(getSlackMessage(false, &fullLog, resp))
 		return
