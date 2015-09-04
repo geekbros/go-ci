@@ -163,13 +163,24 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	// Notify about failure if changed repo can't be found locally.
 	repoDir := filepath.Join(cfg.Gopath, repo.Path)
 	err := os.Chdir(repoDir)
+	defer os.Chdir(currentDir)
 	if err != nil {
 		fullLog = "Can't change current dir to repo's dir."
 		notify(getSlackMessage(false, &fullLog, resp))
 		return
 	}
 
-	defer os.Chdir(currentDir)
+	// Sync repo.
+	// Notify if error.
+	pull := exec.Command("git", "pull", "origin", "master")
+	pull.Start()
+	err = pull.Wait()
+	if err != nil {
+		fullLog = "Can't sync repo " + resp.Repository.Name
+		notify(getSlackMessage(false, &fullLog, resp))
+		return
+	}
+
 	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
 		commandTokens := strings.Split(s, " ")
