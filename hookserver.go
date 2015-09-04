@@ -165,6 +165,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	// Go to repo's directory.
 	// Notify about failure if changed repo can't be found locally.
 	repoDir := filepath.Join(gopath, repo.Path)
+	log.Println("GOPATH: ", gopath)
 	log.Println("Repo dir: ", repoDir)
 	err := os.Chdir(repoDir)
 	if err != nil {
