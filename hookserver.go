@@ -162,8 +162,6 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	// Go to repo's directory.
 	// Notify about failure if changed repo can't be found locally.
 	repoDir := filepath.Join(cfg.Gopath, repo.Path)
-	log.Println("GOPATH: ", cfg.Gopath)
-	log.Println("Repo dir: ", repoDir)
 	err := os.Chdir(repoDir)
 	if err != nil {
 		fullLog = "Can't change current dir to repo's dir."
@@ -174,9 +172,13 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	defer os.Chdir(currentDir)
 	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
-		cmd = exec.Command("sudo", "./"+s)
-		// cmd.Stdout = os.Stdout
-		// cmd.Stderr = os.Stdout
+		commandTokens := strings.Split(s, " ")
+		if len(commandTokens) == 1 {
+			cmd = exec.Command("./" + commandTokens[0])
+		} else {
+			// Case when concrete command given instead of script.
+			cmd = exec.Command(commandTokens[0], commandTokens[1:]...)
+		}
 		stdout, _ := cmd.StdoutPipe()
 		err = cmd.Start()
 
