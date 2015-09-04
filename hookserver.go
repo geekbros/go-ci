@@ -22,7 +22,8 @@ const (
 )
 
 var (
-	cfg config
+	cfg    config
+	gopath = os.Getenv("GOPATH")
 )
 
 type (
@@ -37,8 +38,8 @@ type (
 		HooksPath       string `json:"hooks_path"`
 		NotificationURL string `json:"notification_url"`
 		Channel         string `json:"channel"`
-		Gopath          string `json:"gopath"`
-		Repos           []repo `json:"gopath_local_repos"`
+		//Gopath          string `json:"gopath"`
+		Repos []repo `json:"gopath_local_repos"`
 	}
 
 	// GitHub webhook json response struct.
@@ -161,7 +162,8 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 	// Go to repo's directory.
 	// Notify about failure if changed repo can't be found locally.
-	repoDir := filepath.Join(cfg.Gopath, repo.Path)
+	//repoDir := filepath.Join(cfg.Gopath, repo.Path)
+	repoDir := filepath.Join(gopath, repo.Path)
 	err := os.Chdir(repoDir)
 	defer os.Chdir(currentDir)
 	if err != nil {
