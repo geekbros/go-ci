@@ -130,7 +130,7 @@ func init() {
 func getRepo(repoName string) (r repo) {
 	for _, v := range cfg.Repos {
 		if strings.Contains(v.Path, repoName) {
-			r = v
+			return v
 		}
 	}
 	return
