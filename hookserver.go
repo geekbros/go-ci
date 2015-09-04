@@ -195,6 +195,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			cmd = exec.Command(commandTokens[0], commandTokens[1:]...)
 		}
 		stdout, _ := cmd.StdoutPipe()
+		stderr, _ := cmd.StderrPipe()
 		err = cmd.Start()
 
 		// Can't execute script - notify about fail and stop.
@@ -205,7 +206,9 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		content, _ := ioutil.ReadAll(stdout)
-		fullLog = string(content)
+		errContent, _ := ioutil.ReadAll(stderr)
+
+		fullLog = string(content) + "\n" + string(errContent)
 
 		err = cmd.Wait()
 		// Script executed with error - notify about fail and stop.
