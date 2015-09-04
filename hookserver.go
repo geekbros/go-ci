@@ -175,8 +175,8 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
 		cmd = exec.Command("sudo", "./"+s)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stdout
+		// cmd.Stdout = os.Stdout
+		// cmd.Stderr = os.Stdout
 		stdout, _ := cmd.StdoutPipe()
 		err = cmd.Start()
 
