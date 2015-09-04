@@ -94,7 +94,6 @@ func getSlackMessage(success bool, log *string, r *githubResponse) *slackMessage
 		color = "danger"
 		text = *log
 	}
-
 	return &slackMessage{
 		Channel: cfg.Channel,
 		Attachments: []attachment{
