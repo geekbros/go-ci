@@ -10,7 +10,7 @@
         },
         {
             "path":"src/github.com/geekbros/SHM-Backend/",
-            "scripts":["webserver/build", "webserver/buildrun", "webserver/test"]
+            "scripts":["webserver/build", "webserver/run", "webserver/test"]
         }
     ]
 }
