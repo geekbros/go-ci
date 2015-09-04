@@ -185,6 +185,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			notify(getSlackMessage(false, &fullLog, resp))
 			return
 		}
+
 		buf := bufio.NewScanner(stdout)
 		for buf.Scan() {
 			tempText = buf.Text()
