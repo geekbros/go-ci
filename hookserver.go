@@ -100,7 +100,7 @@ func getSlackMessage(success bool, log *string, title string, r *githubResponse)
 			attachment{
 				Fallback:  fallback,
 				Color:     color,
-				Text:      "After _" + r.HeadCommit.Committer.Name + "_ pushed to _" + r.Repository.Name + "_\n" + text,
+				Text:      "After " + r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name + "\n" + text,
 				Title:     title,
 				TitleLink: r.HeadCommit.URL,
 				Fields: []field{
