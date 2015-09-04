@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 const (
@@ -24,6 +25,8 @@ const (
 var (
 	cfg    config
 	gopath = os.Getenv("GOPATH")
+
+	lock = sync.Mutex{}
 )
 
 type (
@@ -135,6 +138,8 @@ func getRepo(repoName string) (r repo) {
 }
 
 func redeploy(w http.ResponseWriter, r *http.Request) {
+	lock.Lock()
+	defer lock.Unlock()
 	// Parse github hook response.
 	defer r.Body.Close()
 	content, _ := ioutil.ReadAll(r.Body)
