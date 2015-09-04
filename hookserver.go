@@ -173,6 +173,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	// Sync repo.
 	// Notify if error.
 	pull := exec.Command("git", "pull", "origin", "master")
+	pull.Stdout = os.Stdout
 	pull.Start()
 	err = pull.Wait()
 	if err != nil {
