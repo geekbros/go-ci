@@ -6,8 +6,8 @@
     "gopath":"/var/go",
     "gopath_local_repos":[
         {
-            "path":"src/github.com/geekbros/go-ci/",
-            "scripts":["test-test"]
+            "path":"src/github.com/geekbros/DiskAnalyzer/",
+            "scripts":["build"]
         }
     ]
 }
