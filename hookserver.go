@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -164,7 +164,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 	// Go to repo's directory.
 	// Notify about failure if changed repo can't be found locally.
-	repoDir := path.Join(gopath, repo.Path)
+	repoDir := filepath.Join(gopath, repo.Path)
 	log.Println("Repo dir: ", repoDir)
 	err := os.Chdir(repoDir)
 	if err != nil {
