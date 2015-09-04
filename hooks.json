@@ -1,6 +1,0 @@
-[
-  {
-    "id": "redeploy",
-    "execute-command": "./redeploy.sh"
-  }
-]

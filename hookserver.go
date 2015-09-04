@@ -35,11 +35,9 @@ type (
 
 	config struct {
 		Port            int    `json:"port"`
-		HooksPath       string `json:"hooks_path"`
 		NotificationURL string `json:"notification_url"`
 		Channel         string `json:"channel"`
-		//Gopath          string `json:"gopath"`
-		Repos []repo `json:"gopath_local_repos"`
+		Repos           []repo `json:"gopath_local_repos"`
 	}
 
 	// GitHub webhook json response struct.
