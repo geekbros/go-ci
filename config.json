@@ -5,12 +5,8 @@
     "channel":"#gobuild",
     "gopath_local_repos":[
         {
-            "path":"src/github.com/geekbros/SHM-Backend/",
-            "scripts":["webserver/build", "webserver/test"]
-        },
-        {
-            "path":"src/github.com/geekbros/SHM-Frontend/",
-            "scripts":[]
+            "path":"src/github.com/geekbros/go-ci/",
+            "scripts":["test-test"]
         }
     ]
 }

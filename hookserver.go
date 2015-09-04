@@ -28,6 +28,7 @@ var (
 )
 
 type (
+	// Config structs.
 	repo struct {
 		Path    string   `json:"path"`
 		Scripts []string `json:"scripts"`
@@ -41,6 +42,7 @@ type (
 		Repos           []repo `json:"gopath_local_repos"`
 	}
 
+	// GitHub webhook json response struct.
 	githubResponse struct {
 		HeadCommit struct {
 			Timestamp string `json:"timestamp"`
@@ -56,6 +58,7 @@ type (
 		} `json:"repository"`
 	}
 
+	// Specific Slack request structs.
 	field struct {
 		Title string `json:"title"`
 		Value string `json:"value"`
@@ -77,13 +80,27 @@ type (
 	}
 )
 
-func getSlackMessageGood(success bool, log string, r *githubResponse) slackMessage {
-	return slackMessage{
+func getSlackMessage(success bool, log *string, r *githubResponse) *slackMessage {
+	var (
+		fallback string
+		color    string
+		text     string
+	)
+	if success {
+		fallback = "Build succeeded"
+		color = "good"
+	} else {
+		fallback = "Build failed"
+		color = "danger"
+		text = *log
+	}
+	return &slackMessage{
 		Channel: cfg.Channel,
 		Attachments: []attachment{
 			attachment{
-				Fallback:  "Build succeeded",
-				Color:     "good",
+				Fallback:  fallback,
+				Color:     color,
+				Text:      text,
 				Title:     r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name,
 				TitleLink: r.HeadCommit.URL,
 				Fields: []field{
@@ -92,7 +109,6 @@ func getSlackMessageGood(success bool, log string, r *githubResponse) slackMessa
 			},
 		},
 	}
-
 }
 
 func init() {
@@ -102,7 +118,6 @@ func init() {
 		panic("Can't open config file.")
 	}
 	configContent, err := ioutil.ReadAll(file)
-	fmt.Println(string(configContent))
 	if err != nil {
 		panic("Can't read config file.")
 	}
@@ -110,7 +125,6 @@ func init() {
 	if err != nil {
 		panic("Can't parse config file as json: " + err.Error())
 	}
-	fmt.Printf("%+v\n", cfg)
 }
 
 func getRepo(repoName string) (r repo) {
@@ -123,6 +137,7 @@ func getRepo(repoName string) (r repo) {
 }
 
 func redeploy(w http.ResponseWriter, r *http.Request) {
+	// Parse github hook response.
 	defer r.Body.Close()
 	content, _ := ioutil.ReadAll(r.Body)
 	resp := &githubResponse{}
@@ -137,26 +152,58 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		success  = true
 	)
 
+	// Find out which repo was changed.
+	// Notify about failure if changed repo is not listed in config.
 	repo := getRepo(resp.Repository.Name)
+	if repo.Path == "" {
+		fullLog = "Repo is not listed in config"
+		notify(getSlackMessage(false, &fullLog, resp))
+		return
+	}
 
+	// Go to repo's directory.
+	// Notify about failure if changed repo can't be found locally.
 	repoDir := path.Join(gopath, repo.Path)
-	os.Chdir(repoDir)
+	err := os.Chdir(repoDir)
+	if err != nil {
+		fullLog = "Can't change current dit to repo's dir."
+		notify(getSlackMessage(false, &fullLog, resp))
+		return
+	}
+	defer os.Chdir(currentDir)
+
+	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
 		cmd = exec.Command(s)
 		stdout, _ := cmd.StdoutPipe()
-		cmd.Start()
+		err = cmd.Start()
+		// Can't execute script - notify about fail and stop.
+		if err != nil {
+			fail(s, err, &fullLog, resp, &success)
+			return
+		}
 		buf := bufio.NewScanner(stdout)
 		for buf.Scan() {
 			tempText = buf.Text()
 			fullLog += tempText
-			if strings.Contains(tempText, "FAIL") {
-				success = false
-			}
 		}
-		cmd.Wait()
+		err = cmd.Wait()
+		// Script executed with error - notify about fail and stop.
+		if err != nil {
+			fail(s, err, &fullLog, resp, &success)
+			return
+		}
+		// Everything is OK - notify about success and continue executing other scripts.
+		notify(getSlackMessage(success, &fullLog, resp))
 	}
+}
 
-	notify(resp)
+func fail(script string, err error, fullLog *string, resp *githubResponse, success *bool) {
+	log.Println("Failed while executing " + script)
+	log.Println("Error message: ", err.Error())
+	*success = false
+	notify(getSlackMessage(*success, fullLog, resp))
+	return
 }
 
 func notify(s *slackMessage) {

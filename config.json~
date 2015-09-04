@@ -1,5 +1,0 @@
-{
-    "port":9000,
-    "hooks_path":"hooks.json",
-    "hook_bin":"webhook"
-}
