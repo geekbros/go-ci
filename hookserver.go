@@ -221,6 +221,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			content, _ := ioutil.ReadAll(stdout)
 			errContent, _ := ioutil.ReadAll(stderr)
 			fullLog = string(content) + "\n" + string(errContent)
+			log.Println("LOG: ", fullLog)
 			notify(getSlackMessage(success, &fullLog, s, resp))
 			return
 		}
