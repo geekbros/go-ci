@@ -190,6 +190,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
+		log.Println("Executing script ", s, "...")
 		commandTokens := strings.Split(s, " ")
 		if len(commandTokens) == 1 {
 			cmd = exec.Command("./" + commandTokens[0])
@@ -223,6 +224,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// Everything is OK - notify about success and continue executing other scripts.
+		log.Println("Executing script ", s, " done.")
 		notify(getSlackMessage(success, &fullLog, s, resp))
 	}
 }
