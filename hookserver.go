@@ -200,8 +200,8 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		}
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stdout
-		stdout, _ := cmd.StdoutPipe()
-		stderr, _ := cmd.StderrPipe()
+		// stdout, _ := cmd.StdoutPipe()
+		// stderr, _ := cmd.StderrPipe()
 		err = cmd.Start()
 
 		// Can't execute script - notify about fail and stop.
@@ -211,8 +211,9 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			notify(getSlackMessage(false, &fullLog, s, resp))
 			return
 		}
-		content, _ := ioutil.ReadAll(stdout)
-		errContent, _ := ioutil.ReadAll(stderr)
+		// content, _ := ioutil.ReadAll(stdout)
+		// errContent, _ := ioutil.ReadAll(stderr)
+		content, errContent := "", ""
 
 		fullLog = string(content) + "\n" + string(errContent)
 
