@@ -81,37 +81,6 @@ type (
 	}
 )
 
-func getSlackMessage(success bool, log *string, title string, r *githubResponse) *slackMessage {
-	var (
-		fallback string
-		color    string
-		text     string
-	)
-	if success {
-		fallback = "Build succeeded"
-		color = "good"
-	} else {
-		fallback = "Build failed"
-		color = "danger"
-		text = *log
-	}
-	return &slackMessage{
-		Channel: cfg.Channel,
-		Attachments: []attachment{
-			attachment{
-				Fallback:  fallback,
-				Color:     color,
-				Text:      "After " + r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name + "\n" + text,
-				Title:     title,
-				TitleLink: r.HeadCommit.URL,
-				Fields: []field{
-					field{"Latest commit message", r.HeadCommit.Message, true},
-				},
-			},
-		},
-	}
-}
-
 func init() {
 	file, err := os.Open(configJSONPath)
 	defer file.Close()
@@ -188,6 +157,8 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	attachments := make([]attachment, 1)
+
 	// Execute all repo's scripts.
 	for _, s := range repo.Scripts {
 		log.Println("Executing script ", s, "...")
@@ -233,8 +204,42 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// Everything is OK - notify about success and continue executing other scripts.
-		log.Println("Executing script ", s, " done.")
-		notify(getSlackMessage(success, &fullLog, s, resp))
+		log.Println("Done executing script ", s, " .")
+		attachments = append(attachments, getSlackAttachment(success, &fullLog, s, resp))
+	}
+	notify(&slackMessage{Channel: cfg.Channel, Attachments: attachments})
+}
+
+func getSlackAttachment(success bool, log *string, title string, r *githubResponse) attachment {
+	var (
+		fallback string
+		color    string
+		text     string
+	)
+	if success {
+		fallback = "Script succeeded"
+		color = "good"
+	} else {
+		fallback = "Script failed"
+		color = "danger"
+		text = *log
+	}
+	return attachment{
+		Fallback:  fallback,
+		Color:     color,
+		Text:      "After " + r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name + "\n" + text,
+		Title:     title,
+		TitleLink: r.HeadCommit.URL,
+		Fields: []field{
+			field{"Latest commit message", r.HeadCommit.Message, true},
+		},
+	}
+}
+
+func getSlackMessage(success bool, log *string, title string, r *githubResponse) *slackMessage {
+	return &slackMessage{
+		Channel:     cfg.Channel,
+		Attachments: []attachment{getSlackAttachment(success, log, title, r)},
 	}
 }
 
