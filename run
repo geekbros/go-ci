@@ -1,4 +1,4 @@
 #!/bin/bash
 git pull origin master
 go build hookserver.go
-nohup ./hookserver &
+nohup ./hookserver >> /var/log/shm/hookserver.log &
