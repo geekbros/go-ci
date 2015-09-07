@@ -1,0 +1,136 @@
+{Port:9000 NotificationURL:https://hooks.slack.com/services/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 Channel:#gobuild Repos:[{Path:src/github.com/geekbros/DiskAnalyzer/ Scripts:[go build danalyz.go]} {Path:src/github.com/geekbros/SHM-Backend/ Scripts:[webserver/build webserver/run webserver/test]} {Path:src/github.com/geekbros/SHM-Frontend/ Scripts:[]}]}
+Updating b3a7513..1c37beb
+Fast-forward
+ webserver/run | 1 +
+ 1 file changed, 1 insertion(+)
+Updating 1c37beb..8f58a34
+Fast-forward
+ webserver/run | 1 -
+ 1 file changed, 1 deletion(-)
+Updating 8f58a34..4b68405
+Fast-forward
+ webserver/run | 1 +
+ 1 file changed, 1 insertion(+)
+Updating 4b68405..fd9ccc9
+Fast-forward
+ webserver/run | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+Updating fd9ccc9..f7d28db
+Fast-forward
+ panicerr/handlers.go                     | 12 +++++++++
+ webserver/handlers/utemplates/handler.go | 44 +++++++++++++++++---------------
+ webserver/main.go                        |  2 +-
+ 3 files changed, 37 insertions(+), 21 deletions(-)
+ create mode 100644 panicerr/handlers.go
+2015/09/04 09:29:00 Failed while executing webserver/run
+2015/09/04 09:29:00 Error message:  exit status 1
+{Port:9000 NotificationURL:https://hooks.slack.com/services/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 Channel:#gobuild Repos:[{Path:src/github.com/geekbros/DiskAnalyzer/ Scripts:[go build danalyz.go]} {Path:src/github.com/geekbros/SHM-Backend/ Scripts:[webserver/build webserver/run webserver/test]} {Path:src/github.com/geekbros/SHM-Frontend/ Scripts:[]}]}
+Updating f7d28db..6e33582
+Fast-forward
+ webserver/run | 1 -
+ 1 file changed, 1 deletion(-)
+2015/09/04 09:41:30 Failed while executing webserver/run
+2015/09/04 09:41:30 Error message:  exit status 1
+{Port:9000 NotificationURL:https://hooks.slack.com/services/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 Channel:#gobuild Repos:[{Path:src/github.com/geekbros/DiskAnalyzer/ Scripts:[go build danalyz.go]} {Path:src/github.com/geekbros/SHM-Backend/ Scripts:[webserver/build webserver/run webserver/test]} {Path:src/github.com/geekbros/SHM-Frontend/ Scripts:[]}]}
+Updating 6e33582..5df0120
+Fast-forward
+ webserver/run | 9 +--------
+ 1 file changed, 1 insertion(+), 8 deletions(-)
+Updating 5df0120..a09e816
+Fast-forward
+ webserver/run | 1 +
+ 1 file changed, 1 insertion(+)
+{Port:9000 NotificationURL:https://hooks.slack.com/services/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 Channel:#gobuild Repos:[{Path:src/github.com/geekbros/DiskAnalyzer/ Scripts:[go build danalyz.go]} {Path:src/github.com/geekbros/SHM-Backend/ Scripts:[webserver/build webserver/run webserver/test]} {Path:src/github.com/geekbros/SHM-Frontend/ Scripts:[]}]}
+Updating a09e816..3a10e37
+Fast-forward
+ README.md | 2 ++
+ 1 file changed, 2 insertions(+)
+Updating 3a10e37..7b289f7
+Fast-forward
+ webserver/run | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+{Port:9000 NotificationURL:https://hooks.slack.com/services/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 Channel:#gobuild Repos:[{Path:src/github.com/geekbros/DiskAnalyzer/ Scripts:[go build danalyz.go]} {Path:src/github.com/geekbros/SHM-Backend/ Scripts:[webserver/build webserver/run webserver/test]} {Path:src/github.com/geekbros/SHM-Frontend/ Scripts:[]}]}
+Updating 7b289f7..8f069ce
+Fast-forward
+ README.md     | 2 --
+ webserver/run | 2 +-
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+2015/09/04 10:08:04 Failed while executing webserver/run
+2015/09/04 10:08:04 Error message:  exit status 2
+{Port:9000 NotificationURL:https://hooks.slack.com/services/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 Channel:#gobuild Repos:[{Path:src/github.com/geekbros/DiskAnalyzer/ Scripts:[go build danalyz.go]} {Path:src/github.com/geekbros/SHM-Backend/ Scripts:[webserver/build webserver/run webserver/test]} {Path:src/github.com/geekbros/SHM-Frontend/ Scripts:[]}]}
+Updating 8f069ce..ef8f0f6
+Fast-forward
+ README.md | 1 +
+ 1 file changed, 1 insertion(+)
+{Port:9000 NotificationURL:https://hooks.slack.com/services/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 Channel:#gobuild Repos:[{Path:src/github.com/geekbros/DiskAnalyzer/ Scripts:[go build danalyz.go]} {Path:src/github.com/geekbros/SHM-Backend/ Scripts:[webserver/build webserver/run webserver/test]} {Path:src/github.com/geekbros/SHM-Frontend/ Scripts:[]}]}
+Updating ef8f0f6..55e21e9
+Fast-forward
+ README.md     | 1 +
+ webserver/run | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+{Port:9000 NotificationURL:https://hooks.slack.com/services/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 Channel:#gobuild Repos:[{Path:src/github.com/geekbros/DiskAnalyzer/ Scripts:[go build danalyz.go]} {Path:src/github.com/geekbros/SHM-Backend/ Scripts:[webserver/build webserver/run webserver/test]} {Path:src/github.com/geekbros/SHM-Frontend/ Scripts:[]}]}
+Updating 55e21e9..c0c63f0
+2015/09/04 10:28:59 Syncing error:  exit status 1
+{Port:9000 NotificationURL:https://hooks.slack.com/services/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 Channel:#gobuild Repos:[{Path:src/github.com/geekbros/DiskAnalyzer/ Scripts:[go build danalyz.go]} {Path:src/github.com/geekbros/SHM-Backend/ Scripts:[webserver/build webserver/run webserver/test]} {Path:src/github.com/geekbros/SHM-Frontend/ Scripts:[]}]}
+Updating c0c63f0..31fb986
+Fast-forward
+ README.md | 1 +
+ 1 file changed, 1 insertion(+)
+2015/09/06 13:49:03 Failed while executing webserver/run
+2015/09/06 13:49:03 Error message:  exit status 1
+Updating 31fb986..395915b
+Fast-forward
+ webserver/handlers/info/handler.go       |  8 ++++++--
+ webserver/handlers/iptables/handler.go   |  8 ++++++--
+ webserver/handlers/pftpd/handler.go      |  7 +++++--
+ webserver/handlers/utemplates/handler.go | 30 +++++++++++++++---------------
+ 4 files changed, 32 insertions(+), 21 deletions(-)
+2015/09/06 14:03:42 Failed while executing webserver/run
+2015/09/06 14:03:42 Error message:  exit status 1
+Already up-to-date.
+Already up-to-date.
+Already up-to-date.
+Already up-to-date.
+Already up-to-date.
+Already up-to-date.
+Already up-to-date.
+Updating c0565d9..6ef182d
+Fast-forward
+ Testing/js/controllers/SessionInfo.js | 6 +++++-
+ Testing/tpl/blocks/header.html        | 2 +-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+Updating 6ef182d..3c2c939
+Fast-forward
+ Testing/js/controllers/SessionInfo.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+Updating 3c2c939..90fe9eb
+Fast-forward
+ Testing/js/app.min.js                 |   4 +-
+ Testing/js/app.src.js                 | 142 +++++++++++++++++-----------------
+ Testing/js/config.lazyload.js         | 142 +++++++++++++++++-----------------
+ Testing/js/controllers/SessionInfo.js |   2 -
+ Testing/tpl/blocks/header.html        | 103 ------------------------
+ Testing/tpl/blocks/nav.html           |  21 +++--
+ 6 files changed, 153 insertions(+), 261 deletions(-)
+Updating 395915b..596ea0c
+Fast-forward
+ webserver/main.go | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+2015/09/06 15:11:13 Failed while executing webserver/run
+2015/09/06 15:11:13 Error message:  exit status 1
+Already up-to-date.
+2015/09/06 15:14:33 Failed while executing webserver/run
+2015/09/06 15:14:33 Error message:  exit status 1
+Already up-to-date.
+2015/09/06 15:15:38 Failed while executing webserver/run
+2015/09/06 15:15:38 Error message:  exit status 1
+Updating 21668bf..316c538
+Fast-forward
+ webserver/build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+2015/09/06 15:16:23 Failed while executing webserver/run
+2015/09/06 15:16:23 Error message:  exit status 1
+Already up-to-date.
+2015/09/06 15:31:14 Failed while executing webserver/run
+2015/09/06 15:31:14 Error message:  exit status 1
+Already up-to-date.
