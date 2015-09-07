@@ -198,6 +198,8 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			// Case when concrete command given instead of script.
 			cmd = exec.Command(commandTokens[0], commandTokens[1:]...)
 		}
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stdout
 		stdout, _ := cmd.StdoutPipe()
 		stderr, _ := cmd.StderrPipe()
 		err = cmd.Start()
