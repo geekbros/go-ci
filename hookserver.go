@@ -198,10 +198,10 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			// Case when concrete command given instead of script.
 			cmd = exec.Command(commandTokens[0], commandTokens[1:]...)
 		}
-		// cmd.Stdout = os.Stdout
-		// cmd.Stderr = os.Stdout
-		stdout, _ := cmd.StdoutPipe()
-		stderr, _ := cmd.StderrPipe()
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stdout
+		// stdout, _ := cmd.StdoutPipe()
+		// stderr, _ := cmd.StderrPipe()
 		err = cmd.Start()
 
 		// Can't execute script - notify about fail and stop.
@@ -218,10 +218,10 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			log.Println("Failed while executing " + s)
 			log.Println("Error message: ", err.Error())
 			success = false
-			content, _ := ioutil.ReadAll(stdout)
-			errContent, _ := ioutil.ReadAll(stderr)
-			fullLog = string(content) + "\n" + string(errContent)
-			log.Println("LOG: ", fullLog)
+			// content, _ := ioutil.ReadAll(stdout)
+			// errContent, _ := ioutil.ReadAll(stderr)
+			// fullLog = string(content) + "\n" + string(errContent)
+			// log.Println("LOG: ", fullLog)
 			notify(getSlackMessage(success, &fullLog, s, resp))
 			return
 		}
