@@ -213,14 +213,13 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		content, _ := ioutil.ReadAll(stdout)
-		errContent, _ := ioutil.ReadAll(stderr)
-		fullLog = string(content) + "\n" + string(errContent)
-		log.Println("LOG: ", fullLog)
-
 		err = cmd.Wait()
 		// Script executed with error - notify about fail and stop.
 		if err != nil {
+			content, _ := ioutil.ReadAll(stdout)
+			errContent, _ := ioutil.ReadAll(stderr)
+			fullLog = string(content) + "\n" + string(errContent)
+			log.Println("LOG: ", fullLog)
 			log.Println("Failed while executing " + s)
 			log.Println("Error message: ", err.Error())
 			success = false
