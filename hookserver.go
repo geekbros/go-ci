@@ -164,7 +164,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		log.Println("Executing script ", s, "...")
 		commandTokens := strings.Split(s, " ")
 		if len(commandTokens) == 1 {
-			cmd = exec.Command("./" + commandTokens[0])
+			cmd = exec.Command("sh", "-c", "./"+commandTokens[0])
 		} else {
 			// Case when concrete command given instead of script.
 			cmd = exec.Command(commandTokens[0], commandTokens[1:]...)
