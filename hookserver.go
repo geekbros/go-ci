@@ -239,9 +239,6 @@ func getSlackAttachment(success bool, log *string, title string, r *githubRespon
 		color = "danger"
 		text = *log
 	}
-	if text != "" {
-		text = "`" + text + "`"
-	}
 	return attachment{
 		Fallback: fallback,
 		Color:    color,
@@ -258,7 +255,7 @@ func getSlackMessage(success bool, log *string, title string, r *githubResponse,
 		successMessage = "FAIL:interrobang:"
 	}
 	return &slackMessage{
-		Text: fmt.Sprintf("\n_%v_\nAfter *%v* pushed to *%v*.\n*Latest commit message*: <%v|%v>\n*Log*: \n`%v`",
+		Text: fmt.Sprintf("\n_%v_\nAfter *%v* pushed to *%v*.\n*Latest commit message*: <%v|%v>\n*Log*: \n%v",
 			successMessage, r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.URL, r.HeadCommit.Message, *log),
 		Channel:     cfg.Channel,
 		Attachments: attachments,
