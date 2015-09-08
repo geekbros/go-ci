@@ -123,14 +123,17 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 	currentDir, _ := os.Getwd()
 
-	var fullLog string
+	var (
+		attachments []attachment
+		fullLog     string
+	)
 
 	// Find out which repo was changed.
 	// Notify about failure if changed repo is not listed in config.
 	repo := getRepo(resp.Repository.Name)
 	if repo.Path == "" {
 		fullLog = "Repo is not listed in config"
-		notify(getSlackMessage(false, &fullLog, "Build failed", resp))
+		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
 		return
 	}
 
@@ -141,7 +144,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	defer os.Chdir(currentDir)
 	if err != nil {
 		fullLog = "Can't change current dir to repo's dir."
-		notify(getSlackMessage(false, &fullLog, "Build failed", resp))
+		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
 		return
 	}
 
@@ -154,7 +157,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Syncing error: ", err.Error())
 		fullLog = "Can't sync repo " + resp.Repository.Name
-		notify(getSlackMessage(false, &fullLog, "Build failed", resp))
+		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
 		return
 	}
 
@@ -162,7 +165,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	fullLog += scriptsLog
 
 	if len(attachments) > 0 {
-		notify(&slackMessage{Channel: cfg.Channel, Attachments: attachments})
+		notify(getSlackMessage(false, &fullLog, "Script succeeded", resp, attachments))
 	}
 }
 
@@ -191,7 +194,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		if err != nil {
 			log.Println("Script execution error: ", err)
 			fullLog = "Can't execute script " + s
-			notify(getSlackMessage(false, &fullLog, s, resp))
+			notify(getSlackMessage(false, &fullLog, s, resp, attachments))
 			return
 		}
 
@@ -209,7 +212,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 			log.Println("Failed while executing " + s)
 			log.Println("Error message: ", err.Error())
 
-			notify(getSlackMessage(false, &fullLog, s, resp))
+			notify(getSlackMessage(false, &fullLog, s, resp, attachments))
 			return
 		}
 		// Everything is OK - notify about success and continue executing other scripts.
@@ -242,14 +245,14 @@ func getSlackAttachment(success bool, log *string, title string, r *githubRespon
 	}
 }
 
-func getSlackMessage(success bool, log *string, title string, r *githubResponse) *slackMessage {
+func getSlackMessage(success bool, log *string, title string, r *githubResponse, attachments []attachment) *slackMessage {
 	return &slackMessage{
 		Text: fmt.Sprintf("After %v pushed to %v.\nLatest commit message: \n%v\nLog: \n%v",
 			r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.Message, *log),
 		// Text: "After " + r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name +
 		// 	"\n" + "Latest commit message: \n" + r.HeadCommit.Message + "\n" + *log,
 		Channel:     cfg.Channel,
-		Attachments: []attachment{getSlackAttachment(success, log, title, r)},
+		Attachments: attachments,
 	}
 }
 
