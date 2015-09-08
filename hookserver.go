@@ -30,10 +30,15 @@ var (
 )
 
 type (
+	script struct {
+		Script string `json:"script"`
+		Wait   bool   `json:"wait"`
+	}
+
 	// Config structs.
 	repo struct {
 		Path    string   `json:"path"`
-		Scripts []string `json:"scripts"`
+		Scripts []script `json:"scripts"`
 	}
 
 	config struct {
@@ -177,7 +182,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 	// Execute all repo's scripts.
 	for _, s := range r.Scripts {
 		log.Println("Executing script ", s, "...")
-		commandTokens := strings.Split(s, " ")
+		commandTokens := strings.Split(s.Script, " ")
 		if len(commandTokens) == 1 {
 			cmd = exec.Command("./"+commandTokens[0], "&")
 		} else {
@@ -193,7 +198,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		// Can't execute script - notify about fail and stop.
 		if err != nil {
 			log.Println("Script execution error: ", err)
-			fullLog = "Can't execute script " + s
+			fullLog = "Can't execute script " + s.Script
 			//notify(getSlackMessage(false, &fullLog, s, resp, attachments))
 			return
 		}
@@ -202,14 +207,16 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 			content, _ := ioutil.ReadAll(stdout)
 			errContent, _ := ioutil.ReadAll(stderr)
 			fullLog = string(content) + "\n" + string(errContent)
-			log.Println("Log of "+s+": ", fullLog)
+			log.Println("Log of "+s.Script+": ", fullLog)
 		}()
 
-		//err = cmd.Wait()
+		if s.Wait {
+			err = cmd.Wait()
+		}
 		// Script executed with error - notify about fail and stop.
 		if err != nil {
 
-			log.Println("Failed while executing " + s)
+			log.Println("Failed while executing " + s.Script)
 			log.Println("Error message: ", err.Error())
 
 			//notify(getSlackMessage(false, &fullLog, s, resp, attachments))
@@ -217,7 +224,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		}
 		// Everything is OK - notify about success and continue executing other scripts.
 		log.Println("Done executing script ", s, " .")
-		attachments = append(attachments, getSlackAttachment(true, &fullLog, s, resp))
+		attachments = append(attachments, getSlackAttachment(true, &fullLog, s.Script, resp))
 	}
 	return
 }
