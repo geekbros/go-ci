@@ -164,10 +164,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	attachments, scriptsLog := executeScripts(repo, resp)
 	fullLog += scriptsLog
 
-	//if len(attachments) > 0 {
 	notify(getSlackMessage(false, &fullLog, "Script succeeded", resp, attachments))
-
-	//}
 }
 
 func executeScripts(r repo, resp *githubResponse) (attachments []attachment, fullLog string) {
@@ -180,7 +177,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		log.Println("Executing script ", s, "...")
 		commandTokens := strings.Split(s, " ")
 		if len(commandTokens) == 1 {
-			cmd = exec.Command("./" + commandTokens[0])
+			cmd = exec.Command("./"+commandTokens[0], "&")
 		} else {
 			// Case when concrete command given instead of script.
 			cmd = exec.Command(commandTokens[0], commandTokens[1:]...)
@@ -219,8 +216,6 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		// Everything is OK - notify about success and continue executing other scripts.
 		log.Println("Done executing script ", s, " .")
 		attachments = append(attachments, getSlackAttachment(true, &fullLog, s, resp))
-	}
-	for {
 	}
 	return
 }
