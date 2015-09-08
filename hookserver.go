@@ -171,11 +171,13 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 func executeScripts(r repo, resp *githubResponse) (attachments []attachment, fullLog string) {
 	var (
-		cmd *exec.Cmd
+		cmd         *exec.Cmd
+		scriptMutex sync.Mutex
 	)
 
 	// Execute all repo's scripts.
 	for _, s := range r.Scripts {
+		scriptMutex.Lock()
 		log.Println("Executing script ", s, "...")
 		commandTokens := strings.Split(s, " ")
 		if len(commandTokens) == 1 {
@@ -202,7 +204,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 			content, _ := ioutil.ReadAll(stdout)
 			errContent, _ := ioutil.ReadAll(stderr)
 			fullLog = string(content) + "\n" + string(errContent)
-			log.Println("LOG: ", fullLog)
+			log.Println("Log of "+s+": ", fullLog)
 		}()
 
 		err = cmd.Wait()
@@ -219,7 +221,8 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		log.Println("Done executing script ", s, " .")
 		attachments = append(attachments, getSlackAttachment(true, &fullLog, s, resp))
 	}
-	return
+	for {
+	}
 }
 
 func getSlackAttachment(success bool, log *string, title string, r *githubResponse) attachment {
