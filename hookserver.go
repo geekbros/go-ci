@@ -168,8 +168,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 func executeScripts(r repo, resp *githubResponse) (attachments []attachment, fullLog string) {
 	var (
-		cmd     *exec.Cmd
-		success bool
+		cmd *exec.Cmd
 	)
 
 	// Execute all repo's scripts.
@@ -209,14 +208,13 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 
 			log.Println("Failed while executing " + s)
 			log.Println("Error message: ", err.Error())
-			success = false
 
-			notify(getSlackMessage(success, &fullLog, s, resp))
+			notify(getSlackMessage(false, &fullLog, s, resp))
 			return
 		}
 		// Everything is OK - notify about success and continue executing other scripts.
 		log.Println("Done executing script ", s, " .")
-		attachments = append(attachments, getSlackAttachment(success, &fullLog, s, resp))
+		attachments = append(attachments, getSlackAttachment(true, &fullLog, s, resp))
 	}
 	return
 }
