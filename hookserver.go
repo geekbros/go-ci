@@ -199,7 +199,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		if err != nil {
 			log.Println("Script execution error: ", err)
 			fullLog = "Can't execute script " + s.Script
-			//notify(getSlackMessage(false, &fullLog, s, resp, attachments))
+			attachments = append(attachments, getSlackAttachment(false, &fullLog, s.Script, resp))
 			return
 		}
 
@@ -217,7 +217,6 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		if err != nil {
 			log.Println("Failed while executing " + s.Script)
 			log.Println("Error message: ", err.Error())
-
 			attachments = append(attachments, getSlackAttachment(false, &fullLog, s.Script, resp))
 			return
 		}
