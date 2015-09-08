@@ -20,6 +20,10 @@
         {
             "path":"src/github.com/geekbros/SHM-Frontend/",
             "scripts":[]
+        },
+        {
+            "path":"src/github.com/geekbros/go-ci/",
+            "scripts":[]
         }
     ]
 }
