@@ -171,13 +171,11 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 func executeScripts(r repo, resp *githubResponse) (attachments []attachment, fullLog string) {
 	var (
-		cmd         *exec.Cmd
-		scriptMutex sync.Mutex
+		cmd *exec.Cmd
 	)
 
 	// Execute all repo's scripts.
 	for _, s := range r.Scripts {
-		scriptMutex.Lock()
 		log.Println("Executing script ", s, "...")
 		commandTokens := strings.Split(s, " ")
 		if len(commandTokens) == 1 {
