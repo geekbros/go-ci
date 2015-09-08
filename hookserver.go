@@ -215,11 +215,10 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		}
 		// Script executed with error - notify about fail and stop.
 		if err != nil {
-
 			log.Println("Failed while executing " + s.Script)
 			log.Println("Error message: ", err.Error())
 
-			//notify(getSlackMessage(false, &fullLog, s, resp, attachments))
+			attachments = append(attachments, getSlackAttachment(false, &fullLog, s.Script, resp))
 			return
 		}
 		// Everything is OK - notify about success and continue executing other scripts.
