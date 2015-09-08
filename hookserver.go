@@ -247,10 +247,8 @@ func getSlackAttachment(success bool, log *string, title string, r *githubRespon
 
 func getSlackMessage(success bool, log *string, title string, r *githubResponse, attachments []attachment) *slackMessage {
 	return &slackMessage{
-		Text: fmt.Sprintf("After *%v* pushed to *%v*.\n*Latest commit message*: \n%v\n*Log*: \n%v",
+		Text: fmt.Sprintf("After *%v* pushed to *%v*.\n*Latest commit message*: %v\n*Log*: \n%v",
 			r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.Message, *log),
-		// Text: "After " + r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name +
-		// 	"\n" + "Latest commit message: \n" + r.HeadCommit.Message + "\n" + *log,
 		Channel:     cfg.Channel,
 		Attachments: attachments,
 	}
