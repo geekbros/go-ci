@@ -205,7 +205,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 			log.Println("Log of "+s+": ", fullLog)
 		}()
 
-		err = cmd.Wait()
+		//err = cmd.Wait()
 		// Script executed with error - notify about fail and stop.
 		if err != nil {
 
