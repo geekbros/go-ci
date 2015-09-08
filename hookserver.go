@@ -154,7 +154,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Sync repo.
-	// Notify if error.
+	// Notify if error occured.
 	pull := exec.Command("git", "pull", "origin", "master")
 	pull.Stdout = os.Stdout
 	pull.Start()
@@ -175,9 +175,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 }
 
 func executeScripts(r repo, resp *githubResponse) (attachments []attachment, fullLog string) {
-	var (
-		cmd *exec.Cmd
-	)
+	var cmd *exec.Cmd
 
 	// Execute all repo's scripts.
 	for _, s := range r.Scripts {
@@ -202,14 +200,14 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 			attachments = append(attachments, getSlackAttachment(false, &fullLog, s.Script, resp))
 			return
 		}
-
+		// Reading all cmd's output while it can.
 		go func() {
 			content, _ := ioutil.ReadAll(stdout)
 			errContent, _ := ioutil.ReadAll(stderr)
 			fullLog = string(content) + "\n" + string(errContent)
 			log.Println("Log of "+s.Script+": ", fullLog)
 		}()
-
+		// Case when script is marked as "wait":"true" in config.
 		if s.Wait {
 			err = cmd.Wait()
 		}
@@ -242,18 +240,17 @@ func getSlackAttachment(success bool, log *string, title string, r *githubRespon
 		text = *log
 	}
 	return attachment{
-		Fallback:  fallback,
-		Color:     color,
-		Text:      text,
-		Title:     title,
-		TitleLink: r.HeadCommit.URL,
+		Fallback: fallback,
+		Color:    color,
+		Text:     text,
+		Title:    title,
 	}
 }
 
 func getSlackMessage(log *string, title string, r *githubResponse, attachments []attachment) *slackMessage {
 	return &slackMessage{
-		Text: fmt.Sprintf("After *%v* pushed to *%v*.\n*Latest commit message*: %v\n*Log*: \n%v",
-			r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.Message, *log),
+		Text: fmt.Sprintf("After *%v* pushed to *%v*.\n*Latest commit message*: <%v|%v>\n*Log*: \n%v",
+			r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.URL, r.HeadCommit.Message, *log),
 		Channel:     cfg.Channel,
 		Attachments: attachments,
 	}
