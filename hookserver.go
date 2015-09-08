@@ -120,8 +120,8 @@ func getRepo(repoName string) (r repo) {
 func redeploy(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	defer lock.Unlock()
-	// Parse github hook response.
 	defer r.Body.Close()
+	// Parse github hook response.
 	content, _ := ioutil.ReadAll(r.Body)
 	resp := &githubResponse{}
 	json.Unmarshal(content, resp)
@@ -138,7 +138,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	repo := getRepo(resp.Repository.Name)
 	if repo.Path == "" {
 		fullLog = "Repo is not listed in config"
-		notify(getSlackMessage(&fullLog, "Build failed", resp, attachments))
+		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
 		return
 	}
 
@@ -149,7 +149,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	defer os.Chdir(currentDir)
 	if err != nil {
 		fullLog = "Can't change current dir to repo's dir."
-		notify(getSlackMessage(&fullLog, "Build failed", resp, attachments))
+		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
 		return
 	}
 
@@ -162,7 +162,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Syncing error: ", err.Error())
 		fullLog = "Can't sync repo " + resp.Repository.Name
-		notify(getSlackMessage(&fullLog, "Build failed", resp, attachments))
+		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
 		return
 	}
 
@@ -170,7 +170,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	fullLog += scriptsLog
 
 	if len(attachments) > 0 {
-		notify(getSlackMessage(&fullLog, "Script succeeded", resp, attachments))
+		notify(getSlackMessage(true, &fullLog, "Script succeeded", resp, attachments))
 	}
 }
 
@@ -247,10 +247,16 @@ func getSlackAttachment(success bool, log *string, title string, r *githubRespon
 	}
 }
 
-func getSlackMessage(log *string, title string, r *githubResponse, attachments []attachment) *slackMessage {
+func getSlackMessage(success bool, log *string, title string, r *githubResponse, attachments []attachment) *slackMessage {
+	var successMessage string
+	if success {
+		successMessage = "SUCCESS!:tada:"
+	} else {
+		successMessage = "FAIL!:interrobang:"
+	}
 	return &slackMessage{
-		Text: fmt.Sprintf("After *%v* pushed to *%v*.\n*Latest commit message*: <%v|%v>\n*Log*: \n%v",
-			r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.URL, r.HeadCommit.Message, *log),
+		Text: fmt.Sprintf("%v\nAfter *%v* pushed to *%v*.\n*Latest commit message*: <%v|%v>\n*Log*: \n%v",
+			successMessage, r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.URL, r.HeadCommit.Message, *log),
 		Channel:     cfg.Channel,
 		Attachments: attachments,
 	}
