@@ -164,7 +164,9 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	attachments, scriptsLog := executeScripts(repo, resp)
 	fullLog += scriptsLog
 
-	notify(getSlackMessage(&fullLog, "Script succeeded", resp, attachments))
+	if len(attachments) > 0 {
+		notify(getSlackMessage(&fullLog, "Script succeeded", resp, attachments))
+	}
 }
 
 func executeScripts(r repo, resp *githubResponse) (attachments []attachment, fullLog string) {
