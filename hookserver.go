@@ -76,11 +76,13 @@ type (
 	}
 
 	slackMessage struct {
+		Text        string       `json:"text"`
 		Channel     string       `json:"string"`
 		Attachments []attachment `json:"attachments"`
 	}
 )
 
+// init initializes cfg with config.json content
 func init() {
 	file, err := os.Open(configJSONPath)
 	defer file.Close()
@@ -106,6 +108,10 @@ func getRepo(repoName string) (r repo) {
 	return
 }
 
+// redeploy is a http handler chain function, which
+// is given info about push request to watched repository.
+// It syncs it to it's remote's current state and executes all
+// of it's scripts, listed in corresponding config sections.
 func redeploy(w http.ResponseWriter, r *http.Request) {
 	lock.Lock()
 	defer lock.Unlock()
@@ -117,11 +123,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 	currentDir, _ := os.Getwd()
 
-	var (
-		cmd     *exec.Cmd
-		fullLog string
-		success = true
-	)
+	var fullLog string
 
 	// Find out which repo was changed.
 	// Notify about failure if changed repo is not listed in config.
@@ -134,7 +136,6 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 
 	// Go to repo's directory.
 	// Notify about failure if changed repo can't be found locally.
-	//repoDir := filepath.Join(cfg.Gopath, repo.Path)
 	repoDir := filepath.Join(gopath, repo.Path)
 	err := os.Chdir(repoDir)
 	defer os.Chdir(currentDir)
@@ -157,10 +158,22 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	attachments := make([]attachment, 1)
+	attachments, scriptsLog := executeScripts(repo, resp)
+	fullLog += scriptsLog
+
+	if len(attachments) > 0 {
+		notify(&slackMessage{Channel: cfg.Channel, Attachments: attachments})
+	}
+}
+
+func executeScripts(r repo, resp *githubResponse) (attachments []attachment, fullLog string) {
+	var (
+		cmd     *exec.Cmd
+		success bool
+	)
 
 	// Execute all repo's scripts.
-	for _, s := range repo.Scripts {
+	for _, s := range r.Scripts {
 		log.Println("Executing script ", s, "...")
 		commandTokens := strings.Split(s, " ")
 		if len(commandTokens) == 1 {
@@ -170,12 +183,10 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 			cmd = exec.Command(commandTokens[0], commandTokens[1:]...)
 		}
 
-		// cmd.Stdout = os.Stdout
-		// cmd.Stderr = os.Stdout
 		stdout, _ := cmd.StdoutPipe()
 		stderr, _ := cmd.StderrPipe()
 
-		err = cmd.Start()
+		err := cmd.Start()
 
 		// Can't execute script - notify about fail and stop.
 		if err != nil {
@@ -207,7 +218,7 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		log.Println("Done executing script ", s, " .")
 		attachments = append(attachments, getSlackAttachment(success, &fullLog, s, resp))
 	}
-	notify(&slackMessage{Channel: cfg.Channel, Attachments: attachments})
+	return
 }
 
 func getSlackAttachment(success bool, log *string, title string, r *githubResponse) attachment {
@@ -227,17 +238,18 @@ func getSlackAttachment(success bool, log *string, title string, r *githubRespon
 	return attachment{
 		Fallback:  fallback,
 		Color:     color,
-		Text:      "After " + r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name + "\n" + text,
+		Text:      text,
 		Title:     title,
 		TitleLink: r.HeadCommit.URL,
-		Fields: []field{
-			field{"Latest commit message", r.HeadCommit.Message, true},
-		},
 	}
 }
 
 func getSlackMessage(success bool, log *string, title string, r *githubResponse) *slackMessage {
 	return &slackMessage{
+		Text: fmt.Sprintf("After %v pushed to %v.\nLatest commit message: \n%v\nLog: \n%v",
+			r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.Message, *log),
+		// Text: "After " + r.HeadCommit.Committer.Name + " pushed to " + r.Repository.Name +
+		// 	"\n" + "Latest commit message: \n" + r.HeadCommit.Message + "\n" + *log,
 		Channel:     cfg.Channel,
 		Attachments: []attachment{getSlackAttachment(success, log, title, r)},
 	}
