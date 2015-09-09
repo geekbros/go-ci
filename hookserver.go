@@ -171,6 +171,11 @@ func Redeploy(w http.ResponseWriter, r *http.Request) {
 	if len(attachments) > 0 {
 		notify(getSlackMessage(success, worker.fullLog, "Script succeeded", worker.resp, attachments))
 	}
+
+	notify(&slackMessage{
+		Text:    "Done redeploying.",
+		Channel: cfg.Channel,
+	})
 }
 
 // Restart is a http handler function.
