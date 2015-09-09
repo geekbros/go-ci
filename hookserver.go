@@ -23,8 +23,9 @@ const (
 )
 
 var (
-	cfg    config
-	gopath = os.Getenv("GOPATH")
+	cfg                 config
+	gopath              = os.Getenv("GOPATH")
+	workingDirectory, _ = os.Getwd()
 
 	lock = sync.Mutex{}
 )
@@ -104,8 +105,6 @@ func newRepoWorker(w http.ResponseWriter, r *http.Request) (worker repoWorker) {
 	resp := &githubResponse{}
 	json.Unmarshal(content, resp)
 
-	currentDir, _ := os.Getwd()
-
 	var (
 		attachments []attachment
 		fullLog     string
@@ -126,7 +125,7 @@ func newRepoWorker(w http.ResponseWriter, r *http.Request) (worker repoWorker) {
 	// Notify about failure if changed repo can't be found locally.
 	repoDir := filepath.Join(gopath, repo.Path)
 	err := os.Chdir(repoDir)
-	defer os.Chdir(currentDir)
+
 	if err != nil {
 		fullLog = "Can't change current dir to repo's dir."
 		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
