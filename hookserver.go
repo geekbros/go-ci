@@ -184,10 +184,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		Channel: cfg.Channel,
 	})
 
-	syncVal := r.Form.Get("sync")
-	if syncVal == "true" {
-		reload(worker)
-	}
+	reload(worker)
 
 	attachments, scriptsLog, success := executeScripts(worker.repository, worker.resp)
 	*worker.fullLog += scriptsLog
