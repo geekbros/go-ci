@@ -224,10 +224,10 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 
 	// Execute all repo's scripts.
 	for _, s := range r.Scripts {
-		log.Println("Executing script ", s, "...")
+		log.Println("Executing script ", s.Script, "...")
 		commandTokens := strings.Split(s.Script, " ")
 		if len(commandTokens) == 1 {
-			cmd = exec.Command("./"+commandTokens[0], "&")
+			cmd = exec.Command("./" + commandTokens[0])
 		} else {
 			// Case when concrete command given instead of script.
 			cmd = exec.Command(commandTokens[0], commandTokens[1:]...)
