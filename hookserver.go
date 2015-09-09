@@ -29,6 +29,7 @@ var (
 	lock = sync.Mutex{}
 )
 
+// JSON handling structs
 type (
 	script struct {
 		Script string `json:"script"`
@@ -87,37 +88,14 @@ type (
 	}
 )
 
-// init initializes cfg with config.json content
-func init() {
-	file, err := os.Open(configJSONPath)
-	defer file.Close()
-	if err != nil {
-		panic("Can't open config file.")
-	}
-	configContent, err := ioutil.ReadAll(file)
-	if err != nil {
-		panic("Can't read config file.")
-	}
-	err = json.Unmarshal(configContent, &cfg)
-	if err != nil {
-		panic("Can't parse config file as json: " + err.Error())
-	}
+type repoWorker struct {
+	fullLog     *string
+	resp        *githubResponse
+	attachments []attachment
+	repository  repo
 }
 
-func getRepo(repoName string) (r repo) {
-	for _, v := range cfg.Repos {
-		if strings.Contains(v.Path, repoName) {
-			return v
-		}
-	}
-	return
-}
-
-// redeploy is a http handler chain function, which
-// is given info about push request to watched repository.
-// It syncs it to it's remote's current state and executes all
-// of it's scripts, listed in corresponding config sections.
-func redeploy(w http.ResponseWriter, r *http.Request) {
+func newRepoWorker(w http.ResponseWriter, r *http.Request) (worker repoWorker) {
 	lock.Lock()
 	defer lock.Unlock()
 	defer r.Body.Close()
@@ -136,6 +114,8 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 	// Find out which repo was changed.
 	// Notify about failure if changed repo is not listed in config.
 	repo := getRepo(resp.Repository.Name)
+	worker = repoWorker{fullLog: &fullLog, resp: resp, attachments: attachments, repository: repo}
+
 	if repo.Path == "" {
 		fullLog = "Repo is not listed in config"
 		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
@@ -152,25 +132,71 @@ func redeploy(w http.ResponseWriter, r *http.Request) {
 		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
 		return
 	}
+	return
+}
 
+// init initializes cfg with config.json content
+func init() {
+	file, err := os.Open(configJSONPath)
+	defer file.Close()
+	if err != nil {
+		panic("Can't open config file.")
+	}
+	configContent, err := ioutil.ReadAll(file)
+	if err != nil {
+		panic("Can't read config file.")
+	}
+	err = json.Unmarshal(configContent, &cfg)
+	if err != nil {
+		panic("Can't parse config file as json: " + err.Error())
+	}
+}
+
+// redeploy is a http handler chain function, which
+// is given info about push request to watched repository.
+// It syncs it to it's remote's current state and executes all
+// of it's scripts, listed in corresponding config sections.
+func Redeploy(w http.ResponseWriter, r *http.Request) {
+	worker := newRepoWorker(w, r)
+
+	reload(worker)
+
+	attachments, scriptsLog := executeScripts(worker.repository, worker.resp)
+	*worker.fullLog += scriptsLog
+
+	if len(attachments) > 0 {
+		notify(getSlackMessage(true, worker.fullLog, "Script succeeded", worker.resp, attachments))
+	}
+}
+
+func Restart(w http.ResponseWriter, r *http.Request) {
+	worker := newRepoWorker(w, r)
+
+	syncVal := r.Form.Get("sync")
+	if syncVal == "true" {
+		reload(worker)
+	}
+
+	attachments, scriptsLog := executeScripts(worker.repository, worker.resp)
+	*worker.fullLog += scriptsLog
+
+	if len(attachments) > 0 {
+		notify(getSlackMessage(true, worker.fullLog, "Restart succeeded", worker.resp, attachments))
+	}
+}
+
+func reload(worker repoWorker) {
 	// Sync repo.
 	// Notify if error occured.
 	pull := exec.Command("git", "pull", "origin", "master")
 	pull.Stdout = os.Stdout
 	pull.Start()
-	err = pull.Wait()
+	err := pull.Wait()
 	if err != nil {
 		log.Println("Syncing error: ", err.Error())
-		fullLog = "Can't sync repo " + resp.Repository.Name
-		notify(getSlackMessage(false, &fullLog, "Build failed", resp, attachments))
+		*worker.fullLog += "Can't sync repo " + worker.resp.Repository.Name
+		notify(getSlackMessage(false, worker.fullLog, "Build failed", worker.resp, worker.attachments))
 		return
-	}
-
-	attachments, scriptsLog := executeScripts(repo, resp)
-	fullLog += scriptsLog
-
-	if len(attachments) > 0 {
-		notify(getSlackMessage(true, &fullLog, "Script succeeded", resp, attachments))
 	}
 }
 
@@ -225,6 +251,15 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 	return
 }
 
+func getRepo(repoName string) (r repo) {
+	for _, v := range cfg.Repos {
+		if strings.Contains(v.Path, repoName) {
+			return v
+		}
+	}
+	return
+}
+
 func getSlackAttachment(success bool, log *string, title string, r *githubResponse) attachment {
 	var (
 		fallback string
@@ -275,7 +310,8 @@ func notify(s *slackMessage) {
 }
 
 func main() {
-	http.HandleFunc(`/hooks/redeploy`, redeploy)
+	http.HandleFunc(`/hooks/redeploy`, Redeploy)
+	http.HandleFunc(`/hooks/restart`, Restart)
 	fmt.Printf("%+v\n", cfg)
 	http.ListenAndServe(fmt.Sprintf(":%v", cfg.Port), nil)
 }
