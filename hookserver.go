@@ -192,6 +192,11 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 	if len(attachments) > 0 {
 		notify(getSlackMessage(success, worker.fullLog, "Restart succeeded", worker.resp, attachments))
 	}
+
+	notify(&slackMessage{
+		Text:    "Done restarting.",
+		Channel: cfg.Channel,
+	})
 }
 
 func reload(worker repoWorker) {
@@ -322,6 +327,5 @@ func notify(s *slackMessage) {
 func main() {
 	http.HandleFunc(`/hooks/redeploy`, Redeploy)
 	http.HandleFunc(`/hooks/restart`, Restart)
-	fmt.Printf("%+v\n", cfg)
 	http.ListenAndServe(fmt.Sprintf(":%v", cfg.Port), nil)
 }
