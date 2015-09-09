@@ -151,7 +151,7 @@ func init() {
 	}
 }
 
-// redeploy is a http handler chain function, which
+// Redeploy is a http handler chain function, which
 // is given info about push request to watched repository.
 // It syncs it to it's remote's current state and executes all
 // of it's scripts, listed in corresponding config sections.
@@ -160,14 +160,17 @@ func Redeploy(w http.ResponseWriter, r *http.Request) {
 
 	reload(worker)
 
-	attachments, scriptsLog := executeScripts(worker.repository, worker.resp)
+	attachments, scriptsLog, success := executeScripts(worker.repository, worker.resp)
 	*worker.fullLog += scriptsLog
 
 	if len(attachments) > 0 {
-		notify(getSlackMessage(true, worker.fullLog, "Script succeeded", worker.resp, attachments))
+		notify(getSlackMessage(success, worker.fullLog, "Script succeeded", worker.resp, attachments))
 	}
 }
 
+// Restart is a http handler function.
+// It syncs all repos from config to their remote's current state and executes all
+// of their scripts, listed in corresponding config sections.
 func Restart(w http.ResponseWriter, r *http.Request) {
 	worker := newRepoWorker(w, r)
 
@@ -181,11 +184,11 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 		reload(worker)
 	}
 
-	attachments, scriptsLog := executeScripts(worker.repository, worker.resp)
+	attachments, scriptsLog, success := executeScripts(worker.repository, worker.resp)
 	*worker.fullLog += scriptsLog
 
 	if len(attachments) > 0 {
-		notify(getSlackMessage(true, worker.fullLog, "Restart succeeded", worker.resp, attachments))
+		notify(getSlackMessage(success, worker.fullLog, "Restart succeeded", worker.resp, attachments))
 	}
 }
 
@@ -204,7 +207,7 @@ func reload(worker repoWorker) {
 	}
 }
 
-func executeScripts(r repo, resp *githubResponse) (attachments []attachment, fullLog string) {
+func executeScripts(r repo, resp *githubResponse) (attachments []attachment, fullLog string, success bool) {
 	var cmd *exec.Cmd
 
 	// Execute all repo's scripts.
@@ -251,6 +254,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		// Everything is OK - notify about success and continue executing other scripts.
 		log.Println("Done executing script ", s, " .")
 		attachments = append(attachments, getSlackAttachment(true, &fullLog, s.Script, resp))
+		success = true
 	}
 	return
 }
