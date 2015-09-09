@@ -4,12 +4,6 @@
     "channel":"#gobuild",
     "gopath_local_repos":[
         {
-            "path":"src/github.com/geekbros/DiskAnalyzer/",
-            "scripts":[
-                {"script":"go build danalyz.go","wait": true}
-            ]
-        },
-        {
             "path":"src/github.com/geekbros/SHM-Backend/",
             "scripts":[
                  {"script":"webserver/build","wait":true},
