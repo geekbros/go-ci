@@ -171,6 +171,11 @@ func Redeploy(w http.ResponseWriter, r *http.Request) {
 func Restart(w http.ResponseWriter, r *http.Request) {
 	worker := newRepoWorker(w, r)
 
+	notify(&slackMessage{
+		Text:    "Restarting initiated...",
+		Channel: cfg.Channel,
+	})
+
 	syncVal := r.Form.Get("sync")
 	if syncVal == "true" {
 		reload(worker)
