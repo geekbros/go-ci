@@ -158,6 +158,11 @@ func init() {
 func Redeploy(w http.ResponseWriter, r *http.Request) {
 	worker := newRepoWorker(w, r)
 
+	notify(&slackMessage{
+		Text:    "Redeploying initiated...",
+		Channel: cfg.Channel,
+	})
+
 	reload(worker)
 
 	attachments, scriptsLog, success := executeScripts(worker.repository, worker.resp)
