@@ -318,8 +318,8 @@ func getSlackMessage(success bool, log *string, title string, r *githubResponse,
 		successMessage = "FAIL:interrobang:"
 	}
 	return &slackMessage{
-		Text: fmt.Sprintf("\n_%v_\nAfter *%v* pushed to *%v*.\n*Latest commit message*: <%v|%v>\n",
-			successMessage, r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.URL, r.HeadCommit.Message),
+		Text: fmt.Sprintf("\n_%v_\nAfter *%v* pushed to *%v*.\n*Latest commit message*: <%v|%v>\n*Log*: \n%v",
+			successMessage, r.HeadCommit.Committer.Name, r.Repository.Name, r.HeadCommit.URL, r.HeadCommit.Message, *log),
 		Channel:     cfg.Channel,
 		Attachments: attachments,
 	}
