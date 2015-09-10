@@ -245,19 +245,21 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 			attachments = append(attachments, getSlackAttachment(false, &fullLog, s.Script, resp))
 			return
 		}
-		// Reading all cmd's output while it can.
-		//go func() {
-		content, _ := ioutil.ReadAll(stdout)
-		errContent, _ := ioutil.ReadAll(stderr)
-		fullLog = string(content) + "\n" + string(errContent)
-		log.Println("Log of "+s.Script+": ", fullLog)
-		//}()
+
 		// Case when script is marked as "wait":"true" in config.
 		if s.Wait {
 			err = cmd.Wait()
 		}
 		// Script executed with error - notify about fail and stop.
 		if err != nil {
+			// Reading all cmd's output while it can.
+			// go func() {
+			content, _ := ioutil.ReadAll(stdout)
+			errContent, _ := ioutil.ReadAll(stderr)
+			fullLog = string(content) + "\n" + string(errContent)
+			log.Println("Log of "+s.Script+": ", fullLog)
+			// }()
+
 			log.Println("Failed while executing " + s.Script)
 			log.Println("Error message: ", err.Error())
 			attachments = append(attachments, getSlackAttachment(false, &fullLog, s.Script, resp))
