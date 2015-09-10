@@ -241,7 +241,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		// Can't execute script - notify about fail and stop.
 		if err != nil {
 			log.Println("Script execution error: ", err)
-			fullLog = "Can't execute script " + s.Script
+			fullLog += "Can't execute script " + s.Script + ". " + err.Error()
 			attachments = append(attachments, getSlackAttachment(false, &fullLog, s.Script, resp))
 			return
 		}
