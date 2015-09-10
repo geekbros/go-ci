@@ -246,12 +246,12 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 			return
 		}
 		// Reading all cmd's output while it can.
-		go func() {
-			content, _ := ioutil.ReadAll(stdout)
-			errContent, _ := ioutil.ReadAll(stderr)
-			fullLog = string(content) + "\n" + string(errContent)
-			log.Println("Log of "+s.Script+": ", fullLog)
-		}()
+		//go func() {
+		content, _ := ioutil.ReadAll(stdout)
+		errContent, _ := ioutil.ReadAll(stderr)
+		fullLog = string(content) + "\n" + string(errContent)
+		log.Println("Log of "+s.Script+": ", fullLog)
+		//}()
 		// Case when script is marked as "wait":"true" in config.
 		if s.Wait {
 			err = cmd.Wait()
