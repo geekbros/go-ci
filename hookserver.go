@@ -209,6 +209,9 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 }
 
 func reload(worker repoWorker) {
+	defer func() {
+		procPool.Clear()
+	}()
 	// Sync repo.
 	// Notify if error occured.
 	pull := procPool.Command("git", "pull", "origin", "master")
