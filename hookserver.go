@@ -210,7 +210,7 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 
 func reload(worker repoWorker) {
 	// defer func() {
-	// 	procPool.Clear()
+	procPool.Clear()
 	// }()
 	// Sync repo.
 	// Notify if error occured.
