@@ -43,6 +43,9 @@ func (p *Pool) Clear() (err error) {
 	}()
 	log.Println("Old processes: ", p.processes)
 	for _, v := range p.processes {
+		if v == nil {
+			continue
+		}
 		err = v.Kill()
 		if err != nil {
 			log.Printf("Can't kill pid %v, error message: %v\n", v.Pid, err.Error())
