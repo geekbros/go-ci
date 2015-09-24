@@ -41,6 +41,7 @@ func (p *Pool) Clear() (err error) {
 	defer func() {
 		p.processes = []*os.Process{}
 	}()
+	log.Println("Old processes: ", p.processes)
 	for _, v := range p.processes {
 		err = v.Kill()
 		if err != nil {
