@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/geekbros/go-ci/procpool"
 )
 
 const (
@@ -27,7 +29,8 @@ var (
 	gopath              = os.Getenv("GOPATH")
 	workingDirectory, _ = os.Getwd()
 
-	lock = sync.Mutex{}
+	lock     = sync.Mutex{}
+	procPool procpool.Pool
 )
 
 // JSON handling structs
@@ -136,6 +139,7 @@ func newRepoWorker(w http.ResponseWriter, r *http.Request) (worker repoWorker) {
 
 // init initializes cfg with config.json content
 func init() {
+	procPool = procpool.NewPool()
 	file, err := os.Open(configJSONPath)
 	defer file.Close()
 	if err != nil {
@@ -205,9 +209,12 @@ func Restart(w http.ResponseWriter, r *http.Request) {
 }
 
 func reload(worker repoWorker) {
+	// defer func() {
+	// 	procPool.Clear()
+	// }()
 	// Sync repo.
 	// Notify if error occured.
-	pull := exec.Command("git", "pull", "origin", "master")
+	pull := procPool.Command("git", "pull", "origin", "master")
 	pull.Stdout = os.Stdout
 	pull.Start()
 	err := pull.Wait()
@@ -227,10 +234,10 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		log.Println("Executing script ", s.Script, "...")
 		commandTokens := strings.Split(s.Script, " ")
 		if len(commandTokens) == 1 {
-			cmd = exec.Command("./" + commandTokens[0])
+			cmd = procPool.Command("./" + commandTokens[0])
 		} else {
 			// Case when concrete command given instead of script.
-			cmd = exec.Command(commandTokens[0], commandTokens[1:]...)
+			cmd = procPool.Command(commandTokens[0], commandTokens[1:]...)
 		}
 
 		stdout, _ := cmd.StdoutPipe()
