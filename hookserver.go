@@ -255,12 +255,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 
 			err = cmd.Wait()
 		}
-		// else {
-		// 	go func() {
-		// 		content, _ = ioutil.ReadAll(stdout)
-		// 		errContent, _ = ioutil.ReadAll(stderr)
-		// 	}()
-		// }
+
 		// Script executed with error - notify about fail and stop.
 		if err != nil {
 			// Reading all cmd's output while it can.
