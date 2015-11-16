@@ -232,7 +232,7 @@ func executeScripts(r repo, resp *githubResponse) (attachments []attachment, ful
 		log.Println("Executing script ", s.Script, "...")
 		commandTokens := strings.Split(s.Script, " ")
 		if len(commandTokens) == 1 {
-			cmd = procPool.Command(commandTokens[0])
+			cmd = procPool.Command("./" + commandTokens[0])
 		} else {
 			// Case when concrete command given instead of script.
 			cmd = procPool.Command(commandTokens[0], commandTokens[1:]...)
